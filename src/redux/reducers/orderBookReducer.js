@@ -37,6 +37,9 @@ export default function reducer(state = defaultState, action) {
       return { ...state, ask: state.ask.filter(o => o.price !== action.price) };
     case GET_BID_ORDERS_DELETE:
       return { ...state, bid: state.bid.filter(o => o.price !== action.price) };
+    case "STOP_WS":
+      ws.close();
+      return state;
     default:
       return state;
   }

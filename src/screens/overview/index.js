@@ -7,7 +7,8 @@ import {
   ScrollView,
   Picker,
   StatusBar,
-  Button
+  Button,
+  NetInfo
 } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -20,6 +21,9 @@ import {
   setCurrentPair,
   fetchPairs
 } from "bitfinexTest/src/redux/reducers/pairsReducer";
+import { fetchOrderBook } from "bitfinexTest/src/redux/reducers/orderBookReducer";
+import { fetchTrades } from "bitfinexTest/src/redux/reducers/tradesReducer";
+import { fetchTicker } from "bitfinexTest/src/redux/reducers/tickerReducer";
 
 const styles = StyleSheet.create({
   container: {
@@ -46,7 +50,19 @@ const styles = StyleSheet.create({
   },
   body: {
     width: "100%",
-    flex: 1
+    flex: 1,
+    marginBottom: 20
+  },
+  networkContainer: {
+    backgroundColor: colors.cardBackground,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    margin: 6,
+    padding: 6
+  },
+  networkText: {
+    color: "red"
   }
 });
 
@@ -70,12 +86,41 @@ const pickerSelectStyles = StyleSheet.create({
   }
 });
 
-const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
+const overview = ({
+  pairs,
+  setCurrentPair,
+  fetchPairs,
+  stopWS,
+  fetchOrderBook,
+  fetchTrades,
+  fetchTicker
+}) => {
   useEffect(() => {
     fetchPairs();
   }, []);
 
+  const [networkAvailable, setNetworkAvailable] = useState(true);
+  useEffect(() => {
+    NetInfo.addEventListener("connectionChange", connectionInfo => {
+      const connected = connectionInfo.type !== "none";
+      setNetworkAvailable(connected);
+    });
+  }, []);
+
   const [orderBookLevel, setOrderBookLevel] = useState(0);
+  const [wsConnected, setWsConnected] = useState(true);
+
+  const toggleWsStatus = () => {
+    if (wsConnected) {
+      stopWS();
+      setWsConnected(false);
+    } else {
+      fetchOrderBook(pairs.selectedPair, orderBookLevel);
+      fetchTrades(pairs.selectedPair);
+      fetchTicker(pairs.selectedPair);
+      setWsConnected(true);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -105,6 +150,11 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
         </View>
       </SafeAreaView>
       <ScrollView style={styles.body}>
+        {!networkAvailable && (
+          <View style={styles.networkContainer}>
+            <Text style={styles.networkText}>Network Not Available!</Text>
+          </View>
+        )}
         <WidgetContainer title="Ticker">
           <Ticker />
         </WidgetContainer>
@@ -136,7 +186,10 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
         <WidgetContainer title="Trades">
           <Trades />
         </WidgetContainer>
-        <Button title="Disconnect" />
+        <Button
+          title={wsConnected ? "Disconnect" : "Connect"}
+          onPress={() => toggleWsStatus()}
+        />
       </ScrollView>
     </View>
   );
@@ -149,7 +202,17 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators({ setCurrentPair, fetchPairs }, dispatch);
+  return bindActionCreators(
+    {
+      setCurrentPair,
+      fetchPairs,
+      fetchOrderBook,
+      fetchTrades,
+      fetchTicker,
+      stopWS: () => ({ type: "STOP_WS" })
+    },
+    dispatch
+  );
 };
 
 export default connect(

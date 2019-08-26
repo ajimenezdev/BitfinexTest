@@ -7,6 +7,9 @@ export default function reducer(state = defaultState, action) {
   switch (action.type) {
     case GET_TICKER_UPDATE:
       return action.ticker;
+    case "STOP_WS":
+      ws.close();
+      return state;
     default:
       return state;
   }

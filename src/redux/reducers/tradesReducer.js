@@ -9,6 +9,9 @@ export default function reducer(state = defaultState, action) {
       return action.trades;
     case GET_TRADES_UPDATE:
       return [action.trade, ...state.slice(0, 24)];
+    case "STOP_WS":
+      ws.close();
+      return state;
     default:
       return state;
   }
