@@ -2579,6 +2579,11 @@ locate-path@^3.0.0:
     p-locate "^3.0.0"
     path-exists "^3.0.0"
 
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
+  integrity sha1-QVxEePK8wwEgwizhDtMib30+GOA=
+
 lodash.pad@^4.1.0:
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/lodash.pad/-/lodash.pad-4.5.1.tgz#4330949a833a7c8da22cc20f6a26c4d59debba70"
@@ -3577,6 +3582,13 @@ react-is@^16.8.1:
 react-native-branch@~3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-3.0.1.tgz#5b07b61cbd290168cd3c3662e017ebe0f356d2ca"
+
+react-native-picker-select@^6.3.2:
+  version "6.3.2"
+  resolved "https://registry.yarnpkg.com/react-native-picker-select/-/react-native-picker-select-6.3.2.tgz#5fad902e77e23f4217eea7e93ef513a4dcf641d7"
+  integrity sha512-f7DNP9M4UHOtsXizpbd1jWgzV38Yn9WEPu+rY2o8to4rr+CHXl/V6W2G1qXkDPMIzUa9oClYsK8PylVRSoH8iQ==
+  dependencies:
+    lodash.isequal "^4.5.0"
 
 react-native-view-shot@2.6.0:
   version "2.6.0"
