@@ -1,5 +1,8 @@
 const GET_ORDERS_SET = "orderBook/GET_ORDERS_SET";
-const GET_ORDERS_UPDATE = "orderBook/GET_ORDERS_UPDATE";
+const GET_BID_ORDERS_UPDATE = "orderBook/GET_BID_ORDERS_UPDATE";
+const GET_ASK_ORDERS_UPDATE = "orderBook/GET_ASK_ORDERS_UPDATE";
+const GET_BID_ORDERS_DELETE = "orderBook/GET_BID_ORDERS_DELETE";
+const GET_ASK_ORDERS_DELETE = "orderBook/GET_ASK_ORDERS_DELETE";
 
 const defaultState = {
   bid: [],
@@ -10,6 +13,30 @@ export default function reducer(state = defaultState, action) {
   switch (action.type) {
     case GET_ORDERS_SET:
       return { ...state, bid: action.bid, ask: action.ask };
+    case GET_ASK_ORDERS_UPDATE: {
+      const ask = [...state.ask];
+      const index = ask.findIndex(o => o.price === action.level.price);
+      if (index !== -1) {
+        ask[index] = action.level;
+      } else {
+        ask.push(action.level);
+      }
+      return { ...state, ask: sortOrders(ask, true) };
+    }
+    case GET_BID_ORDERS_UPDATE: {
+      const bid = [...state.bid];
+      const index = bid.findIndex(o => o.price === action.level.price);
+      if (index !== -1) {
+        bid[index] = action.level;
+      } else {
+        bid.push(action.level);
+      }
+      return { ...state, bid: sortOrders(bid, false) };
+    }
+    case GET_ASK_ORDERS_DELETE:
+      return { ...state, ask: state.ask.filter(o => o.price !== action.price) };
+    case GET_BID_ORDERS_DELETE:
+      return { ...state, bid: state.bid.filter(o => o.price !== action.price) };
     default:
       return state;
   }
@@ -17,15 +44,16 @@ export default function reducer(state = defaultState, action) {
 
 let ws = null;
 
-const parseOrders = (orders, asc) =>
-  orders
-    .map(o => {
-      const [price, count, amount] = o;
-      return { price, count, amount: Math.abs(amount) };
-    })
-    .sort((a, b) =>
-      asc ? (a.price > b.price ? 1 : -1) : a.price < b.price ? 1 : -1
-    );
+const sortOrders = (orders, asc) =>
+  orders.sort((a, b) =>
+    asc ? (a.price > b.price ? 1 : -1) : a.price < b.price ? 1 : -1
+  );
+
+const parseOrders = orders =>
+  orders.map(o => {
+    const [price, count, amount] = o;
+    return { price, count, amount: Math.abs(amount) };
+  });
 
 export const fetchOrderBook = pair => {
   return async dispatch => {
@@ -39,7 +67,7 @@ export const fetchOrderBook = pair => {
           channel: "book",
           symbol: `t${pair.replace("/", "")}`,
           prec: "P0",
-          freq: "F0",
+          freq: "F1",
           len: 25
         })
       );
@@ -53,21 +81,11 @@ export const fetchOrderBook = pair => {
 
       if (Array.isArray(parsedData[1][0])) {
         const [channelId, orders] = parsedData;
-        let bid = parseOrders(orders.filter(o => o[2] >= 0), false);
-        let ask = parseOrders(orders.filter(o => o[2] < 0), true);
-        bid = bid.map((o, idx) => {
-          return {
-            ...o,
-            total: bid.slice(0, idx + 1).reduce((acc, o) => acc + o.amount, 0)
-          };
-        });
-
-        ask = ask.map((o, idx) => {
-          return {
-            ...o,
-            total: ask.slice(0, idx + 1).reduce((acc, o) => acc + o.amount, 0)
-          };
-        });
+        const bid = sortOrders(
+          parseOrders(orders.filter(o => o[2] >= 0)),
+          false
+        );
+        const ask = sortOrders(parseOrders(orders.filter(o => o[2] < 0)), true);
 
         dispatch({
           type: GET_ORDERS_SET,
@@ -75,35 +93,39 @@ export const fetchOrderBook = pair => {
           ask
         });
       } else {
-        // console.log("test:parsedData", parsedData);
+        const [price, count, amount] = parsedData[1];
+        if (count === 0) {
+          // Delete entry
+          if (amount >= 0) {
+            // BID
+            dispatch({
+              type: GET_BID_ORDERS_DELETE,
+              price: price
+            });
+          } else {
+            // ASK
+            dispatch({
+              type: GET_ASK_ORDERS_DELETE,
+              price: price
+            });
+          }
+        } else {
+          // Add/Update entry
+          if (amount >= 0) {
+            // BID
+            dispatch({
+              type: GET_BID_ORDERS_UPDATE,
+              level: { price, count, amount: Math.abs(amount) }
+            });
+          } else {
+            // ASK
+            dispatch({
+              type: GET_ASK_ORDERS_UPDATE,
+              level: { price, count, amount: Math.abs(amount) }
+            });
+          }
+        }
       }
-
-      // console.log("test:data", parsedData);
-
-      // if (parsedData.length === 2) {
-      //   const [channelId, trades] = parsedData;
-      //   dispatch({
-      //     type: GET_TRADES_SET,
-      //     trades: trades.map(t => {
-      //       const [id, timeStamp, amount, price] = t;
-      //       return { id, timeStamp, amount, price };
-      //     })
-      //   });
-      //   // console.log(
-      //   //   "test:trades",
-      //   //   trades.map(t => {
-      //   //     const [id, timeStamp, amount, price] = t;
-      //   //     return { id, timeStamp, amount, price };
-      //   //   })
-      //   // );
-      // } else {
-      //   const [channelId, t, [id, timeStamp, amount, price]] = parsedData;
-      //   dispatch({
-      //     type: GET_TRADES_UPDATE,
-      //     trade: { id, timeStamp, amount, price }
-      //   });
-      //   // console.log("test:update", t, { id, timeStamp, amount, price });
-      // }
     };
 
     ws.onerror = e => {

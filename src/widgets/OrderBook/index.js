@@ -30,6 +30,19 @@ const styles = StyleSheet.create({
 
 const getItemSeparator = () => <View style={styles.separator} />;
 
+const aggregateOrders = orders => {
+  // map through all orders to aggregate total until item
+  const aggregatedOrders = orders.map((o, idx) => ({
+    ...o,
+    total: orders.slice(0, idx + 1).reduce((acc, o) => acc + o.amount, 0)
+  }));
+  const last = aggregatedOrders.slice(-1)[0]; //last element
+  return aggregatedOrders.map(o => ({
+    ...o,
+    allTotalAmount: last && last.total
+  }));
+};
+
 const OrderBook = ({ pair, orderBook, fetchOrderBook }) => {
   useEffect(() => {
     fetchOrderBook(pair);
@@ -38,7 +51,7 @@ const OrderBook = ({ pair, orderBook, fetchOrderBook }) => {
     <View style={styles.container}>
       <View style={styles.column}>
         <FlatList
-          data={orderBook.bid}
+          data={aggregateOrders(orderBook.bid)}
           keyExtractor={item => item.price.toString()}
           renderItem={({ item }) => <OrderBookItem isBid={true} item={item} />}
           ListHeaderComponent={() => (
@@ -52,7 +65,7 @@ const OrderBook = ({ pair, orderBook, fetchOrderBook }) => {
       </View>
       <View style={styles.column}>
         <FlatList
-          data={orderBook.ask}
+          data={aggregateOrders(orderBook.ask)}
           keyExtractor={item => item.price.toString()}
           renderItem={({ item }) => <OrderBookItem isBid={false} item={item} />}
           ListHeaderComponent={() => (
