@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,7 +14,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import colors from "bitfinexTest/src/styles/colors";
 import { WidgetContainer } from "bitfinexTest/src/components";
 import { OrderBook, Ticker, Trades } from "bitfinexTest/src/widgets";
-import { setCurrentPair } from "bitfinexTest/src/redux/reducers/pairsReducer";
+import {
+  setCurrentPair,
+  fetchPairs
+} from "bitfinexTest/src/redux/reducers/pairsReducer";
 
 const styles = StyleSheet.create({
   container: {
@@ -65,7 +68,10 @@ const pickerSelectStyles = StyleSheet.create({
   }
 });
 
-const overview = ({ pairs, setCurrentPair }) => {
+const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
+  useEffect(() => {
+    fetchPairs();
+  }, []);
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -115,7 +121,7 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => {
-  return bindActionCreators({ setCurrentPair }, dispatch);
+  return bindActionCreators({ setCurrentPair, fetchPairs }, dispatch);
 };
 
 export default connect(
