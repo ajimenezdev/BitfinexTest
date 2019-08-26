@@ -8,10 +8,9 @@ import rootReducer from "./reducers/rootReducer";
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage
   // version: 0,
   // migrate: createMigrate(migrations),
-  whitelist: []
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
