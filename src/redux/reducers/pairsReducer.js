@@ -6,7 +6,7 @@ const GET_PAIRS_FAIL = "pairs/GET_PAIRS_FAIL";
 const defaultState = {
   selectedPair: "BTC/USD",
   fetching: false,
-  availablePairs: ["BTCUSD", "BTCETH", "ETHUSD"]
+  availablePairs: []
 };
 
 export default function reducer(state = defaultState, action) {
@@ -36,7 +36,6 @@ const formatPair = pair => {
 };
 
 export const fetchPairs = () => {
-  console.log("test:fetchPairs");
   return dispatch => {
     dispatch({ type: GET_PAIRS_START });
     fetch("https://api.bitfinex.com/v1/symbols")

@@ -4,8 +4,10 @@ import {
   Text,
   SafeAreaView,
   View,
+  ScrollView,
   Picker,
-  StatusBar
+  StatusBar,
+  Button
 } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -72,6 +74,7 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
   useEffect(() => {
     fetchPairs();
   }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -99,7 +102,7 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
           />
         </View>
       </SafeAreaView>
-      <View style={styles.body}>
+      <ScrollView style={styles.body}>
         <WidgetContainer title="Ticker">
           <Ticker />
         </WidgetContainer>
@@ -109,7 +112,8 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
         <WidgetContainer title="Trades">
           <Trades />
         </WidgetContainer>
-      </View>
+        <Button title="Disconnect" />
+      </ScrollView>
     </View>
   );
 };

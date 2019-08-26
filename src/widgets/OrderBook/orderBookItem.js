@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
   }
 });
 
-const OrderBookItem = ({ isBid, item: { price, count, amount } }) => (
+const OrderBookItem = ({ isBid, item: { price, count, amount, total } }) => (
   <View style={[styles.row, isBid ? styles.rowBid : styles.rowAsk]}>
-    <Text style={styles.text}>{amount.toLocaleString()}</Text>
+    <Text style={styles.text}>{total && total.toLocaleString()}</Text>
     {/* <Text style={styles.text}>{count}</Text> */}
     <Text style={styles.text}>{price.toFixed(2)}</Text>
   </View>

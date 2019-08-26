@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { fetchTicker } from "bitfinexTest/src/redux/reducers/tickerReducer";
 import colors from "bitfinexTest/src/styles/colors";
 
 const styles = StyleSheet.create({
@@ -37,37 +39,45 @@ const styles = StyleSheet.create({
   }
 });
 
-const Ticker = ({ ticker, pair }) => (
-  <View style={styles.container}>
-    {/* <View style={styles.left}></View> */}
-    <View style={styles.center}>
-      <Text style={[styles.text, styles.textFirstRow]}>{pair}</Text>
-      <Text style={[styles.text, styles.textSecondRow]}>
-        Vol {ticker.volume.toLocaleString()} BTC
-      </Text>
+const Ticker = ({ ticker, pair, fetchTicker }) => {
+  useEffect(() => {
+    fetchTicker(pair);
+  }, [pair]);
+
+  return (
+    <View style={styles.container}>
+      {/* <View style={styles.left}></View> */}
+      <View style={styles.center}>
+        <Text style={[styles.text, styles.textFirstRow]}>{pair}</Text>
+        <Text style={[styles.text, styles.textSecondRow]}>
+          Vol {ticker && ticker.volume.toLocaleString()} BTC
+        </Text>
+      </View>
+      <View style={styles.right}>
+        <Text style={[styles.text, styles.textFirstRow]}>
+          {ticker && ticker.lastPrice.toLocaleString()}
+        </Text>
+        <Text
+          style={[
+            styles.text,
+            styles.textSecondRow,
+            ticker && ticker.dailyChange > 0 ? styles.textUp : styles.textDown
+          ]}
+        >
+          {ticker && Math.abs(ticker.dailyChange).toLocaleString()}
+          {ticker && (
+            <MaterialCommunityIcons
+              name={ticker.dailyChange > 0 ? "chevron-up" : "chevron-down"}
+              size={14}
+              color={ticker.dailyChange > 0 ? colors.textUp : colors.textDown}
+            />
+          )}
+          ({ticker && (Math.abs(ticker.dailyChangePerc) * 100).toFixed(2)})%
+        </Text>
+      </View>
     </View>
-    <View style={styles.right}>
-      <Text style={[styles.text, styles.textFirstRow]}>
-        {ticker.lastPrice.toLocaleString()}
-      </Text>
-      <Text
-        style={[
-          styles.text,
-          styles.textSecondRow,
-          ticker.dailyChange > 0 ? styles.textUp : styles.textDown
-        ]}
-      >
-        {Math.abs(ticker.dailyChange).toLocaleString()}
-        <MaterialCommunityIcons
-          name={ticker.dailyChange > 0 ? "chevron-down" : "chevron-up"}
-          size={14}
-          color={ticker.dailyChange > 0 ? colors.textUp : colors.textDown}
-        />
-        ({(Math.abs(ticker.dailyChangePerc) * 100).toFixed(2)})%
-      </Text>
-    </View>
-  </View>
-);
+  );
+};
 
 const mapStateToProps = state => {
   return {
@@ -76,4 +86,11 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps)(Ticker);
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({ fetchTicker }, dispatch);
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Ticker);
