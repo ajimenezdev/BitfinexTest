@@ -55,7 +55,7 @@ const parseOrders = orders =>
     return { price, count, amount: Math.abs(amount) };
   });
 
-export const fetchOrderBook = pair => {
+export const fetchOrderBook = (pair, level) => {
   return async dispatch => {
     if (ws) ws.close();
 
@@ -66,7 +66,7 @@ export const fetchOrderBook = pair => {
           event: "subscribe",
           channel: "book",
           symbol: `t${pair.replace("/", "")}`,
-          prec: "P0",
+          prec: `P${level}`,
           freq: "F1",
           len: 25
         })

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -75,6 +75,8 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
     fetchPairs();
   }, []);
 
+  const [orderBookLevel, setOrderBookLevel] = useState(0);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -106,8 +108,30 @@ const overview = ({ pairs, setCurrentPair, fetchPairs }) => {
         <WidgetContainer title="Ticker">
           <Ticker />
         </WidgetContainer>
-        <WidgetContainer title="Order Book">
-          <OrderBook />
+        <WidgetContainer
+          title="Order Book"
+          HeaderActions={
+            <React.Fragment>
+              <MaterialCommunityIcons
+                name="minus"
+                size={24}
+                color="gray"
+                onPress={() =>
+                  setOrderBookLevel(Math.max(0, orderBookLevel - 1))
+                }
+              />
+              <MaterialCommunityIcons
+                name="plus"
+                size={24}
+                color="gray"
+                onPress={() =>
+                  setOrderBookLevel(Math.min(4, orderBookLevel + 1))
+                }
+              />
+            </React.Fragment>
+          }
+        >
+          <OrderBook level={orderBookLevel} />
         </WidgetContainer>
         <WidgetContainer title="Trades">
           <Trades />

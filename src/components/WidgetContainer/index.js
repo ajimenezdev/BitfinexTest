@@ -24,10 +24,15 @@ const styles = StyleSheet.create({
   },
   body: {
     width: "100%"
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    flex: 1,
+    justifyContent: "flex-end"
   }
 });
 
-const WidgetContainer = ({ title, children }) => {
+const WidgetContainer = ({ title, HeaderActions, children }) => {
   const [open, setOpen] = useState(true);
 
   return (
@@ -40,6 +45,7 @@ const WidgetContainer = ({ title, children }) => {
           onPress={() => setOpen(!open)}
         />
         <Text style={styles.title}>{title}</Text>
+        <View style={styles.actionsContainer}>{HeaderActions}</View>
       </TouchableOpacity>
       {open && <View style={styles.body}>{children}</View>}
     </View>

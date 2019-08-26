@@ -43,10 +43,11 @@ const aggregateOrders = orders => {
   }));
 };
 
-const OrderBook = ({ pair, orderBook, fetchOrderBook }) => {
+const OrderBook = ({ level, pair, orderBook, fetchOrderBook }) => {
   useEffect(() => {
-    fetchOrderBook(pair);
-  }, [pair]);
+    fetchOrderBook(pair, level);
+  }, [pair, level]);
+
   return (
     <View style={styles.container}>
       <View style={styles.column}>
@@ -56,7 +57,7 @@ const OrderBook = ({ pair, orderBook, fetchOrderBook }) => {
           renderItem={({ item }) => <OrderBookItem isBid={true} item={item} />}
           ListHeaderComponent={() => (
             <View style={styles.headerRow}>
-              <Text style={styles.text}>Amount</Text>
+              <Text style={styles.text}>Total</Text>
               <Text style={styles.text}>Price</Text>
             </View>
           )}

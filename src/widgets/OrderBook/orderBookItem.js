@@ -40,13 +40,10 @@ const OrderBookItem = ({
         styles.background,
         isBid ? styles.backgroundBid : styles.backgroundAsk,
         { width: `${(total / allTotalAmount) * 100}%` }
-        // { width: "100%" }
       ]}
     ></View>
 
-    <Text style={styles.text}>{total && total.toLocaleString()}</Text>
-    {/* <Text style={styles.text}>{allTotalAmount && allTotalAmount}</Text> */}
-    {/* <Text style={styles.text}>{count}</Text> */}
+    <Text style={styles.text}>{total && total.toFixed(2)}</Text>
     <Text style={styles.text}>{price.toFixed(2)}</Text>
   </View>
 );
