@@ -47,20 +47,12 @@ export const fetchTrades = pair => {
             return { id, timeStamp, amount, price };
           })
         });
-        // console.log(
-        //   "test:trades",
-        //   trades.map(t => {
-        //     const [id, timeStamp, amount, price] = t;
-        //     return { id, timeStamp, amount, price };
-        //   })
-        // );
       } else {
         const [channelId, t, [id, timeStamp, amount, price]] = parsedData;
         dispatch({
           type: GET_TRADES_UPDATE,
           trade: { id, timeStamp, amount, price }
         });
-        // console.log("test:update", t, { id, timeStamp, amount, price });
       }
     };
 
