@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     color: colors.text
   },
   body: {
-    padding: 6
+    width: "100%"
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -7,11 +7,14 @@ import {
   Picker,
   StatusBar
 } from "react-native";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import RNPickerSelect from "react-native-picker-select";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import colors from "bitfinexTest/src/styles/colors";
 import { WidgetContainer } from "bitfinexTest/src/components";
 import { OrderBook, Ticker, Trades } from "bitfinexTest/src/widgets";
+import { setCurrentPair } from "bitfinexTest/src/redux/reducers/pairsReducer";
 
 const styles = StyleSheet.create({
   container: {
@@ -59,12 +62,10 @@ const pickerSelectStyles = StyleSheet.create({
   },
   iconContainer: {
     top: 10
-    // right: 12
   }
 });
 
-const overview = () => {
-  const [currentPair, setCurrentPair] = useState("tBTCUSD");
+const overview = ({ pairs, setCurrentPair }) => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -72,15 +73,14 @@ const overview = () => {
         <View style={styles.headerContent}>
           <Text style={styles.title}>Bitfinex Test</Text>
           <RNPickerSelect
-            value={currentPair}
+            value={pairs.selectedPair}
             style={pickerSelectStyles}
             useNativeAndroidPickerStyle={false}
             onValueChange={value => setCurrentPair(value)}
-            items={[
-              { label: "BTCUSD", value: "tBTCUSD" },
-              { label: "BTCETH", value: "tBTCETH" },
-              { label: "ETHUSD", value: "tETHUSD" }
-            ]}
+            items={pairs.availablePairs.map(pair => ({
+              label: pair,
+              value: pair
+            }))}
             Icon={() => {
               return (
                 <MaterialCommunityIcons
@@ -95,10 +95,10 @@ const overview = () => {
       </SafeAreaView>
       <View style={styles.body}>
         <WidgetContainer title="Ticker">
-          <OrderBook />
+          <Ticker />
         </WidgetContainer>
         <WidgetContainer title="Order Book">
-          <Ticker />
+          <OrderBook />
         </WidgetContainer>
         <WidgetContainer title="Trades">
           <Trades />
@@ -108,4 +108,17 @@ const overview = () => {
   );
 };
 
-export default overview;
+const mapStateToProps = state => {
+  return {
+    pairs: state.pairs
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators({ setCurrentPair }, dispatch);
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(overview);
